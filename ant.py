@@ -13,8 +13,6 @@ import binascii
 global internal_tree
 
 
-
-
 # # # # #  U S E R   V A R I A B L E   # # # # # #
                                                  #
 # Wi-Fi network                                  #
@@ -29,11 +27,9 @@ default_branch = "github_default_branch"         #
 token = "github_token"  # not for public repo    #
                                                  #
 # Updation exclusion                             #
-ignore = ["/ant.py"]              #
+ignore = ["/ant.py"]                             #
                                                  #
 # # # # #  U S E R   V A R I A B L E   # # # # # #
-
-
 
 
 
