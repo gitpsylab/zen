@@ -14,6 +14,7 @@ global internal_tree
 
 
 
+
 # # # # #  U S E R   V A R I A B L E   # # # # # #
                                                  #
 # Wi-Fi network                                  #
@@ -31,6 +32,8 @@ token = "github_token"  # not for public repo    #
 ignore = ["/ant.py"]              #
                                                  #
 # # # # #  U S E R   V A R I A B L E   # # # # # #
+
+
 
 
 
@@ -55,6 +58,7 @@ def pull(f_path,raw_url):
       new_file.close()
     except:
       print('tried to close new_file to save memory durring raw file decode')
+      
   
 def pull_all(tree=call_trees_url,raw = raw,ignore = ignore,isconnected=False):
   if not isconnected:
@@ -98,6 +102,7 @@ def pull_all(tree=call_trees_url,raw = raw,ignore = ignore,isconnected=False):
   time.sleep(10)
   print('resetting machine in 10')
   machine.reset()
+  
 
 def wificonnect(ssid=ssid,password=password,timeout_sec=timeout_sec):
     wlan = network.WLAN(network.STA_IF)
@@ -132,6 +137,7 @@ def build_internal_tree():
   for i in os.listdir():
     add_to_tree(i)
   return(internal_tree)
+  
 
 def add_to_tree(dir_item):
   global internal_tree
@@ -160,11 +166,13 @@ def get_hash(file):
   sha1obj = hashlib.sha1(r_file)
   hash = sha1obj.digest()
   return(binascii.hexlify(hash))
+  
 
 def get_data_hash(data):
     sha1obj = hashlib.sha1(data)
     hash = sha1obj.digest()
     return(binascii.hexlify(hash))
+  
   
 def is_directory(file):
   directory = False
@@ -172,6 +180,7 @@ def is_directory(file):
     return (os.stat(file)[8] == 0)
   except:
     return directory
+    
     
 def pull_git_tree(tree_url=call_trees_url,raw = raw):
   headers = {'User-Agent': 'ant-gitpsylab'} 
@@ -186,6 +195,7 @@ def pull_git_tree(tree_url=call_trees_url,raw = raw):
   tree = json.loads(r.content.decode('utf-8'))
   return(tree)
   
+  
 def parse_git_tree():
   tree = pull_git_tree()
   dirs = []
@@ -197,7 +207,7 @@ def parse_git_tree():
       files.append([i['path'],i['sha'],i['mode']])
   print('dirs:',dirs)
   print('files:',files)
-   
+  
    
 def check_ignore(tree=call_trees_url,raw = raw,ignore = ignore):
   os.chdir('/')
@@ -209,6 +219,7 @@ def check_ignore(tree=call_trees_url,raw = raw,ignore = ignore):
         print(i['path'] + ' not in ignore')
     if i['path'] in ignore:
         print(i['path']+ ' is in ignore')
+      
         
 def remove_ignore(internal_tree,ignore=ignore):
     clean_tree = []
@@ -219,6 +230,7 @@ def remove_ignore(internal_tree,ignore=ignore):
         if i not in ignore:
             clean_tree.append(i)
     return(clean_tree)
+  
         
 def remove_item(item,tree):
     culled = []
@@ -226,11 +238,13 @@ def remove_item(item,tree):
         if item not in i:
             culled.append(i)
     return(culled)
+  
 
 def update():
     print('updates ant.py to newest version')
     raw_url = 'https://raw.githubusercontent.com/gitpsylab/ant/master/'
     pull('ant.py',raw_url+'ant.py')
+  
 
 def backup():
     int_tree = build_internal_tree()
@@ -243,4 +257,3 @@ def backup():
     backup = open('ant.backup','w')
     backup.write(backup_text)
     backup.close()
-
