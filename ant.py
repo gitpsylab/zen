@@ -6,7 +6,6 @@ import network
 import json
 import os
 import time
-import vault
 import hashlib
 import binascii
 
@@ -30,6 +29,7 @@ token = "github_token"  # not for public repo    #
 ignore = ["/ant.py"]                             #
                                                  #
 # # # # #  U S E R   V A R I A B L E   # # # # # #
+
 
 
 
