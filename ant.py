@@ -115,7 +115,7 @@ def wificonnect(ssid=ssid,password=password,timeout_sec=timeout_sec):
     start_time = time.time()
     while not wlan.isconnected() and (time.time() - start_time) < timeout_sec:
         print('.', end="")
-        sleep(0.25)
+        time.sleep(0.25)
 
     if wlan.isconnected():
         print("network connected")
