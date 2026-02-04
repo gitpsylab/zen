@@ -1,7 +1,6 @@
 import ota
 import machine
 
-
 ota = ota.ota(
   user="gitpsylab",
   repo="zen",
@@ -11,7 +10,6 @@ ota = ota.ota(
 )
 
 ota.wificonnect()
-
 if ota.update():
     print("update complete.. rebooting...")
     machine.reset()
