@@ -1,16 +1,30 @@
-import urequests
+import os
+import time
+import network
+import machine
 import uhashlib
+import urequests
+
+
+# # # # #  U S E R   V A R I A B L E   # # # # # #
+#                                                #
+#    ONLY UPDATE LINE NUMBER TWENTY TO ADAPT     #
+#                                                #
+# # # # #  U S E R   V A R I A B L E   # # # # # #
 
 
 class ota:
     raw = "https://raw.githubusercontent.com"
     github = "https://github.com"
 
-    def __init__(self, user, repo, url=None, branch="main", working_dir="zen", files=["boot.py", "main.py"], headers={'User-Agent': 'zen-gitpsylab'}):
+    def __init__(self, user="---", repo="---", url=None, branch="---", working_dir="---", files=["boot.py", "main.py"], headers={'User-Agent': '-----'}, ssid="---", password="---", timeout_sec=--):
         self.base_url = "{}/{}/{}".format(self.raw, user, repo) if user else url.replace(self.github, self.raw)
         self.url = url if url is not None else "{}/{}/{}".format(self.base_url, branch, working_dir)
         self.headers = headers
         self.files = files
+        self.ssid = ssid
+        self.password = password
+        self.timeout_sec = timeout_sec
 
     def _check_hash(self, x, y):
         x_hash = uhashlib.sha1(x.encode())
@@ -52,11 +66,13 @@ class ota:
 
         return changes
 
-    def probe(self):
+    def state(self):
         # Returns true if at least one file update available
         if not self._check_all():
+            print("no new update")
             return False
         else:
+            print("update available")
             return True
 
     def update(self):
@@ -68,8 +84,32 @@ class ota:
                 local_file.write(self._get_file(self.url + "/" + file))
 
         if changes:
+            print("files updated")
             return True
         else:
+            print("no new update")
             return False
 
+    def wificonnect(self):
+        # Connects wifi and returns true if connected by timeout
+        wlan = network.WLAN(network.STA_IF)
+        wlan.active(True)
 
+        if wlan.isconnected():
+            pass
+        else
+        print(f"connecting to network: {ssid}.")
+        wlan.connect(self.ssid, self.password)
+        start_time = time.time()
+        while not wlan.isconnected() and (time.time() - start_time) < self.timeout_sec:
+            print('.', end="")
+            time.sleep(0.5)
+
+        if wlan.isconnected():
+            print("network connected")
+            print("network config:", wlan.ifconfig())
+            Return True
+        else:
+            wlan.active(False)
+            print("network unreachable")
+            Return False
