@@ -97,19 +97,19 @@ class ota:
 
         if wlan.isconnected():
             pass
-        else
-        print(f"connecting to network: {ssid}.")
-        wlan.connect(self.ssid, self.password)
-        start_time = time.time()
-        while not wlan.isconnected() and (time.time() - start_time) < self.timeout_sec:
-            print('.', end="")
-            time.sleep(0.5)
+        else:
+            print(f"connecting to network: {self.ssid}.")
+            wlan.connect(self.ssid, self.password)
+            start_time = time.time()
+            while not wlan.isconnected() and (time.time() - start_time) < self.timeout_sec:
+                print('.', end="")
+                time.sleep(0.5)
 
         if wlan.isconnected():
             print("network connected")
             print("network config:", wlan.ifconfig())
-            Return True
+            return True
         else:
             wlan.active(False)
             print("network unreachable")
-            Return False
+            return False
