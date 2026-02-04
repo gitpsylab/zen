@@ -9,7 +9,12 @@ ota = ota.ota(
   files = ["boot.py", "main.py"]
 )
 
-ota.wificonnect()
-if ota.update():
-    print("update complete.. rebooting...")
-    machine.reset()
+try:
+    # Code that might raise an exception
+    ota.wificonnect()
+    if ota.update():
+        print("update complete.. rebooting...")
+        machine.reset()
+except OSError as e:
+    # Code to handle the error
+    print(f"error encountered: {e}")
