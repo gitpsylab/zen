@@ -1,6 +1,8 @@
 import ota
 import machine
+import network
 
+# github repository access and files to update
 ota = ota.ota(
   user="gitpsylab",
   repo="zen",
@@ -10,11 +12,14 @@ ota = ota.ota(
 )
 
 try:
-    # Code that might raise an exception
     ota.wificonnect()
     if ota.update():
-        print("update complete.. rebooting...")
+        print("rebooting...")
         machine.reset()
+    else:
+        # deactivate micropython ap
+        ap = network.WLAN(network.AP_IF)
+        if ap.active():
+            ap.active(False)
 except OSError as e:
-    # Code to handle the error
-    print(f"error encountered: {e}")
+    print(f"error: {e}")
