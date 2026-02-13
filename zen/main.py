@@ -17,11 +17,11 @@ spi = machine.SPI(2, baudrate=10000000, polarity=1, phase=0, sck=machine.Pin(18)
 cs = machine.Pin(5, machine.Pin.OUT)
 display = dotmatrix.dotmatrix(spi, cs, 4)
 
-display.brightness(5)
+display.brightness(10)
 display.clear()
 display.show()
 
-display.text("TIME")
+display.text("WISE")
 display.show()
 
 time.sleep(2)
