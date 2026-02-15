@@ -28,7 +28,7 @@ DOT_MATRIX_STARTUP_MESSAGE_DURATION = 2
 DOT_MATRIX_STARTUP_BLANK_DURATION = 1
 
 ota = ota.ota()
-led = 0 # machine.Pin(ONBOARD_LED_BLINK_PIN, machine.Pin.OUT)
+led = machine.Pin(ONBOARD_LED_BLINK_PIN, machine.Pin.OUT)
 spi = machine.SPI(SPI_BUS_FOR_DOTMATRIX_DISPLAY, baudrate=SPI_BUS_COMMUNICATION_BAUDRATE, polarity=1, phase=0, sck=machine.Pin(SPI_BUS_CLK_PIN), mosi=machine.Pin(SPI_BUS_DOUT_PIN))
 cs = machine.Pin(DOTMATRIX_CHIPSELECT_PIN, machine.Pin.OUT)
 display = dotmatrix.dotmatrix(spi, cs, DOTMATRIX_NUMBER_OF_MODULES)
