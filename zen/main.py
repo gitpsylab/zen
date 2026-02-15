@@ -1,7 +1,13 @@
 """
 
-DOTMATRIX MODULE CONNECTION:
+DOTMATRIX DIGITAL CLOCK
 
+NETWORK TIME SYNCHRONISED
+
+8x32 MAX7219 DOTMATRIX SPACE
+
+
+DOTMATRIX MODULE CONNECTION:
 
 DOTMATRIX          ESP32
 
@@ -15,7 +21,6 @@ CS                 P5
 
 CLK                P18
 
-
 """
 
 import gc
@@ -25,9 +30,6 @@ import machine
 import network
 import ntptime
 import dotmatrix
-
-gc.collect()
-gc.enable()
 
 TIMEZONE_OFFSET_SECONDS = 19800
 SCREEN_UPDATE_INTERVAL_MS = 500
@@ -46,6 +48,9 @@ WDT_TIMEOUT_MS = 30000
 DOT_MATRIX_STARTUP_MESSAGE = "WISE"
 DOT_MATRIX_STARTUP_MESSAGE_DURATION = 2
 DOT_MATRIX_STARTUP_BLANK_DURATION = 1
+
+gc.collect()
+gc.enable()
 
 ota = ota.ota()
 led = machine.Pin(ONBOARD_LED_BLINK_PIN, machine.Pin.OUT)
