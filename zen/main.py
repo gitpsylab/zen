@@ -162,4 +162,4 @@ while True:
                 pass
         ntp_update_due = False
 
-    time.sleep(0.1)
+    time.sleep(0.05)
