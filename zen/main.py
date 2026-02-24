@@ -18,11 +18,23 @@ VCC                5V
 
 GND                GND
 
-DIN                P23
+DIN                D23
 
-CS                 P5
+CS                 D5
 
-CLK                P18
+CLK                D18
+------------------------------
+
+------------------------------
+NEOPIXEL RING CONNECTION:
+------------------------------
+NEOPIXEL           ESP32
+
+VCC                5V
+
+GND                GND
+
+DIN                D33
 ------------------------------
 
 ------------------------------
@@ -34,7 +46,7 @@ VCC                3V3
 
 GND                GND
 
-DOUT               P15
+DOUT               D15
 ------------------------------
 
 """
@@ -45,6 +57,7 @@ import time
 import machine
 import network
 import ntptime
+import neopixel
 import dotmatrix
 
 
@@ -65,8 +78,11 @@ DOTMATRIX_BRIGHTNESS_LEVEL_DARK = 0
 DOTMATRIX_BRIGHTNESS_LEVEL_LIGHT = 15
 LIGHT_SENSOR_DOUT_PIN = 15
 ONBOARD_LED_BLINK_PIN = 2
+NEOPIXEL_DATA_PIN = 33
+NEOPIXEL_PIXEL_COUNT = 24
+LOOP_SLEEP_DELAY = 0.05
 WDT_TIMEOUT_MS = 30000
-DOT_MATRIX_STARTUP_MESSAGE = "WISE"
+DOT_MATRIX_STARTUP_MESSAGE = "TIME"
 DOT_MATRIX_STARTUP_MESSAGE_DURATION = 2
 DOT_MATRIX_STARTUP_BLANK_DURATION = 1
 
@@ -81,12 +97,14 @@ led = machine.Pin(ONBOARD_LED_BLINK_PIN, machine.Pin.OUT)
 spi = machine.SPI(SPI_BUS_FOR_DOTMATRIX_DISPLAY, baudrate=SPI_BUS_COMMUNICATION_BAUDRATE, polarity=1, phase=0, sck=machine.Pin(SPI_BUS_CLK_PIN), mosi=machine.Pin(SPI_BUS_DOUT_PIN))
 cs = machine.Pin(DOTMATRIX_CHIPSELECT_PIN, machine.Pin.OUT)
 display = dotmatrix.dotmatrix(spi, cs, DOTMATRIX_NUMBER_OF_MODULES)
+neo = neopixel.NeoPixel(machine.Pin(NEOPIXEL_DATA_PIN), NEOPIXEL_PIXEL_COUNT)
 dark = machine.Pin(LIGHT_SENSOR_DOUT_PIN, machine.Pin.IN, machine.Pin.PULL_UP)
 wdt = machine.WDT(timeout=WDT_TIMEOUT_MS)
 
 screen_update_due = False
 ntp_update_due = False
 system_time_synchronised = False
+colorPointer = 0
 
 screen_timer = machine.Timer(SCREEN_UPDATE_HARDWARE_TIMER_ID)
 ntp_timer = machine.Timer(NTP_UPDATE_HARDWARE_TIMER_ID)
@@ -128,7 +146,28 @@ def get_local_time(offset_seconds):
     local_seconds = utc_seconds + offset_seconds
     local_time_tuple = time.localtime(local_seconds)
     return local_time_tuple
-    
+
+def rainbow():
+    global colorPointer
+    numpixel = neo.n
+    colorPointer = colorPointer - numpixel + 1
+    if colorPointer < 0:
+        colorPointer = colorPointer + 1 + 255
+    for i in range(numpixel):
+        if colorPointer < 85:
+            pixelColor = colorPointer & 255
+            neo[i] = (pixelColor * 3, 255 - pixelColor * 3, 0)
+        elif colorPointer < 170:
+            pixelColor = colorPointer & 255 - 85
+            neo[i] = (255 - pixelColor * 3, 0, pixelColor * 3)
+        else:
+            pixelColor = colorPointer & 255 - 170
+            neo[i] = (0, pixelColor * 3, 255 - pixelColor * 3)
+        colorPointer = colorPointer + 1
+        if colorPointer > 255:
+            colorPointer = 0
+    neo.write()
+
 screen_timer.init(mode=machine.Timer.PERIODIC, period=SCREEN_UPDATE_INTERVAL_MS, callback=screen_update)
 ntp_timer.init(mode=machine.Timer.PERIODIC, period=NTP_TIME_SYNC_INTERVAL_MS, callback=ntp_update)
 
@@ -180,6 +219,7 @@ while True:
                 except OSError as e:
                     pass
         wdt.feed()
+        rainbow()
         screen_update_due = False
         
     if ntp_update_due:
@@ -217,4 +257,4 @@ while True:
     else:
         display.brightness(DOTMATRIX_BRIGHTNESS_LEVEL_LIGHT)
         
-    time.sleep(0.05)
+    time.sleep(LOOP_SLEEP_DELAY)
