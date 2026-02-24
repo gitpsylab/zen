@@ -18,11 +18,11 @@ VCC                5V
 
 GND                GND
 
-DIN                D23
+DIN                P23
 
-CS                 D5
+CS                 P5
 
-CLK                D18
+CLK                P18
 ------------------------------
 
 ------------------------------
@@ -34,7 +34,7 @@ VCC                5V
 
 GND                GND
 
-DIN                D33
+DIN                P33
 ------------------------------
 
 ------------------------------
@@ -46,7 +46,7 @@ VCC                3V3
 
 GND                GND
 
-DOUT               D15
+DOUT               P15
 ------------------------------
 
 """
@@ -82,7 +82,7 @@ NEOPIXEL_DATA_PIN = 33
 NEOPIXEL_PIXEL_COUNT = 24
 LOOP_SLEEP_DELAY = 0.05
 WDT_TIMEOUT_MS = 30000
-DOT_MATRIX_STARTUP_MESSAGE = "TIME"
+DOT_MATRIX_STARTUP_MESSAGE = "WISE"
 DOT_MATRIX_STARTUP_MESSAGE_DURATION = 2
 DOT_MATRIX_STARTUP_BLANK_DURATION = 1
 
