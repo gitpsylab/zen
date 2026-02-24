@@ -5,6 +5,6 @@ led = machine.Pin(2, machine.Pin.OUT)
 
 while True:
   led.value(True)
-  time.sleep(2.0)
+  time.sleep(0.2)
   led.value(False)
-  time.sleep(5.0)
+  time.sleep(2.0)
