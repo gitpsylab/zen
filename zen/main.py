@@ -239,7 +239,7 @@ def multi_sensor():
             aht20_temperature = round(aht20.temperature,2)
             aht20_relative_humidity = round(aht20.relative_humidity,2)
             bmp280_temperature = round(bmp280.temperature,2)
-            bmp280_pressure = round(bmp280.pressure,2)
+            bmp280_pressure = round(bmp280.pressure/100,2)
         except OSError as e:
             multi_sensor_active = False
     else:
