@@ -207,16 +207,17 @@ def update_cloud():
             ubidots_connected = False
             
     if ubidots_connected:
-        try:
-            sensor_data = {
-                "temperature": aht20_temperature,
-                "humidity": aht20_relative_humidity,
-                "pressure": bmp280_pressure
-            }
-            json_payload = ujson.dumps(sensor_data)
-            ubidots.publish(UBIDOTS_MQTT_TOPIC, json_payload.encode('utf-8'))
-        except Exception as e:
-            ubidots_connected = False
+        if bmp280_pressure > 0:
+            try:
+                sensor_data = {
+                    "temperature": aht20_temperature,
+                    "humidity": aht20_relative_humidity,
+                    "pressure": bmp280_pressure
+                }
+                json_payload = ujson.dumps(sensor_data)
+                ubidots.publish(UBIDOTS_MQTT_TOPIC, json_payload.encode('utf-8'))
+            except Exception as e:
+                ubidots_connected = False
             
     aht20_temperature = 0
     aht20_relative_humidity = 0
@@ -394,7 +395,6 @@ while True:
                         display.show()
             except OSError as e:
                 pass
-                
         ntp_update_due = False
         
     time.sleep(LOOP_SLEEP_DELAY)
