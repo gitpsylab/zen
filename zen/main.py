@@ -88,7 +88,7 @@ DOTMATRIX_BRIGHTNESS_LEVEL_LIGHT = 15
 DOTMATRIX_CHIPSELECT_PIN = 5
 DOTMATRIX_NUMBER_OF_MODULES = 4
 DOTMATRIX_STARTUP_BLANK_DURATION = 1
-DOTMATRIX_STARTUP_MESSAGE = "TIME"                          ### check and customise ###
+DOTMATRIX_STARTUP_MESSAGE = "WISE"                          ### check and customise ###
 DOTMATRIX_STARTUP_MESSAGE_DURATION = 2
 I2C_BUS_CLK_FREQUENCY = 400000
 I2C_BUS_FOR_SENSOR = 0
@@ -111,10 +111,10 @@ SPI_BUS_DOUT_PIN = 23
 SPI_BUS_FOR_DOTMATRIX_DISPLAY = 2
 TIMEZONE_OFFSET_SECONDS = 19800
 UBIDOTS_BROKER = "industrial.api.ubidots.com"
-UBIDOTS_CLIENT = "dew"                                       ### check and customise ###
+UBIDOTS_CLIENT = "zen"                                       ### check and customise ###
 UBIDOTS_MQTT_PORT = 1883
-UBIDOTS_MQTT_TOPIC = b"/v1.6/devices/dew"                    ### check and customise ###
-UBIDOTS_TOKEN = "BBUS-0NDcBvxd3JOsbMWpo0dJriK3gzo0Yi"        ### check and customise ###
+UBIDOTS_MQTT_TOPIC = b"/v1.6/devices/zen"                    ### check and customise ###
+UBIDOTS_TOKEN = "BBUS-S8rOVASzApkPkFlwQRZ0O7KdwX8vRB"        ### check and customise ###
 WDT_TIMEOUT_MS = 30000
 
 ################# SETTINGS #################
