@@ -391,7 +391,7 @@ while True:
                 initiate_onewire_read()
                 sensor_update_due = False
                 onewire_wait_due = True
-                rainbow()
+                #rainbow()
             elif onewire_wait_due:
                 onewire_wait_due = False
                 onewire_read_due = True
@@ -400,11 +400,11 @@ while True:
                 onewire_read_data()
                 onewire_read_due = False
                 cloud_update_due = True
-                rainbow()
+                #rainbow()
             elif cloud_update_due:                
                 update_cloud()
                 cloud_update_due = False
-                rainbow()
+                #rainbow()
             else:
                 rainbow()
         else:
