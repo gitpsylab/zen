@@ -18,11 +18,11 @@ VCC                5V
 
 GND                GND
 
-DIN                P23
+DIN                D23
 
-CS                 P5
+CS                 D5
 
-CLK                P18
+CLK                D18
 ------------------------------
 
 
@@ -35,12 +35,12 @@ VCC                5V
 
 GND                GND
 
-DIN                P33
+DIN                D33
 ------------------------------
 
 
 ------------------------------
-MULTI-SENSOR CONNECTION:
+I2C MULTI-SENSOR CONNECTION:
 ------------------------------
 MULTI-SENSOR       ESP32
 
@@ -48,9 +48,9 @@ VCC                3V3
 
 GND                GND
 
-SDA                P21
+SDA                D21
 
-SCL                P22
+SCL                D22
 ------------------------------
 
 
@@ -63,10 +63,25 @@ VCC                3V3
 
 GND                GND
 
-DOUT               P15
+DOUT               D15
 ------------------------------
 
+
+------------------------------
+ONEWIRE TEMP SENSOR CONNECTION:
+------------------------------
+TEMP SENSOR        ESP32
+
+VCC                3V3
+
+GND                GND
+
+DATA               D4
+------------------------------
+
+
 """
+
 
 import gc
 import ota
@@ -76,6 +91,8 @@ import sensor
 import machine
 import network
 import ntptime
+import onewire
+import ds18x20
 import neopixel
 import dotmatrix
 import umqtt.robust
@@ -101,10 +118,12 @@ NEOPIXEL_PIXEL_COUNT = 24                                    ### check and custo
 NTP_TIME_SYNC_INTERVAL_MS = 900000
 NTP_UPDATE_HARDWARE_TIMER_ID = 3
 ONBOARD_LED_BLINK_PIN = 2
+ONEWIRE_DATA_PIN = 4
+ONEWIRE_TEMP_SENSOR_RESOLUTION = 12
 SCREEN_UPDATE_HARDWARE_TIMER_ID = 2
 SCREEN_UPDATE_INTERVAL_MS = 500
 SENSOR_UPDATE_HARDWARE_TIMER_ID = 1
-SENSOR_UPDATE_INTERVAL_MS = 30000
+SENSOR_UPDATE_INTERVAL_MS = 120000
 SPI_BUS_CLK_PIN = 18
 SPI_BUS_COMMUNICATION_BAUDRATE = 10000000
 SPI_BUS_DOUT_PIN = 23
@@ -130,6 +149,7 @@ cs = machine.Pin(DOTMATRIX_CHIPSELECT_PIN, machine.Pin.OUT)
 display = dotmatrix.dotmatrix(spi, cs, DOTMATRIX_NUMBER_OF_MODULES)
 neo = neopixel.NeoPixel(machine.Pin(NEOPIXEL_DATA_PIN), NEOPIXEL_PIXEL_COUNT)
 dark = machine.Pin(LIGHT_SENSOR_DOUT_PIN, machine.Pin.IN, machine.Pin.PULL_UP)
+ds = ds18x20.DS18X20(onewire.OneWire(machine.Pin(ONEWIRE_DATA_PIN)))
 i2c = machine.I2C(I2C_BUS_FOR_SENSOR, scl=machine.Pin(I2C_SCL_PIN), sda=machine.Pin(I2C_SDA_PIN), freq=I2C_BUS_CLK_FREQUENCY)
 ubidots = umqtt.robust.MQTTClient(UBIDOTS_CLIENT, UBIDOTS_BROKER, UBIDOTS_MQTT_PORT, user = UBIDOTS_TOKEN, password = UBIDOTS_TOKEN)
 wdt = machine.WDT(timeout=WDT_TIMEOUT_MS)
@@ -140,12 +160,17 @@ ntp_update_due = False
 cloud_update_due = False
 system_time_synchronised = False
 multi_sensor_active = False
+onewire_sensor_active = False
+onewire_wait_due = False
+onewire_read_due = False
 ubidots_connected = False
+
 color_pointer = 0
 aht20_temperature = 0
 aht20_relative_humidity = 0
 bmp280_temperature = 0
 bmp280_pressure = 0
+ds18b20_temperature = 0
 
 screen_timer = machine.Timer(SCREEN_UPDATE_HARDWARE_TIMER_ID)
 sensor_timer = machine.Timer(SENSOR_UPDATE_HARDWARE_TIMER_ID)
@@ -165,6 +190,13 @@ if ap_if.active():
 
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
+
+try:
+    roms = ds.scan()
+    ds.resolution(roms[0], ONEWIRE_TEMP_SENSOR_RESOLUTION)
+    onewire_sensor_active = True
+except Exception as e:
+    onewire_sensor_active = False
 
 display.clear()
 display.show()
@@ -188,6 +220,30 @@ def get_local_time(offset_seconds):
     local_time_tuple = time.localtime(local_seconds)
     return local_time_tuple
 
+def initiate_onewire_read():
+    global ds18b20_temperature
+    
+    if onewire_sensor_active:
+        try:
+            ds.convert_temp()
+        except Exception as e:
+            onewire_sensor_active = False
+            ds18b20_temperature = 0
+    else:
+        ds18b20_temperature = 0
+
+def onewire_read_data():
+    global ds18b20_temperature
+    
+    if onewire_sensor_active:
+        try:
+            ds18b20_temperature = round(ds.read_temp(0),2)
+        except Exception as e:
+            onewire_sensor_active = False
+            ds18b20_temperature = 0
+    else:
+        ds18b20_temperature = 0
+
 def update_cloud():
     global ubidots_connected
     
@@ -207,12 +263,13 @@ def update_cloud():
             ubidots_connected = False
             
     if ubidots_connected:
-        if bmp280_pressure > 0:
+        if bmp280_pressure > 0 or aht20_relative_humidity > 0 or ds18b20_temperature > 0:
             try:
                 sensor_data = {
-                    "temperature": aht20_temperature,
-                    "humidity": aht20_relative_humidity,
-                    "pressure": bmp280_pressure
+                    "air_temperature": aht20_temperature,
+                    "air_pressure": bmp280_pressure,
+                    "relative_humidity": aht20_relative_humidity,
+                    "water_temperature": ds18b20_temperature
                 }
                 json_payload = ujson.dumps(sensor_data)
                 ubidots.publish(UBIDOTS_MQTT_TOPIC, json_payload.encode('utf-8'))
@@ -223,6 +280,7 @@ def update_cloud():
     aht20_relative_humidity = 0
     bmp280_temperature = 0
     bmp280_pressure = 0
+    ds18b20_temperature = 0
 
 def multi_sensor():
     global multi_sensor_active
@@ -320,11 +378,23 @@ while True:
             
             if sensor_update_due:
                 multi_sensor()
+                initiate_onewire_read()
                 sensor_update_due = False
+                onewire_wait_due = True
+                rainbow()
+            elif onewire_wait_due:
+                onewire_wait_due = False
+                onewire_read_due = True
+                rainbow()
+            elif onewire_read_due:
+                onewire_read_data()
+                onewire_read_due = False
                 cloud_update_due = True
-            elif cloud_update_due:
+                rainbow()
+            elif cloud_update_due:                
                 update_cloud()
                 cloud_update_due = False
+                rainbow()
             else:
                 rainbow()
         else:
